@@ -18,8 +18,6 @@ package org.kurron.sample.inbound
 import static org.kurron.sample.feeback.LoggingContext.GENERIC_ERROR
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import static org.springframework.web.bind.annotation.RequestMethod.PUT
-import com.transparent.jcommon.domain.Phrase
-import com.transparent.jcommon.hid.HidBuilder
 import javax.validation.Valid
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
@@ -54,7 +52,7 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
         counterService = aCounterService
     }
 
-    @RequestMapping( method = [RequestMethod.GET], produces = [JSON_MIME_TYPE] )
+    @RequestMapping( method = [RequestMethod.GET], produces = [HypermediaControl.JSON_MIME_TYPE] )
     ResponseEntity<HypermediaControl> apiDiscovery( @RequestHeader( 'X-Correlation-Id' ) Optional<String> correlationID,
                                                     UriComponentsBuilder builder ) {
         counterService.increment( 'gateway.api-discovery' )
@@ -69,7 +67,7 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
     }
 
     //TODO: support for POST is temporary until clients can migrate over to PUT
-    @RequestMapping( method = [PUT,POST], consumes = [JSON_MIME_TYPE], produces = [JSON_MIME_TYPE] )
+    @RequestMapping( method = [PUT,POST], consumes = [HypermediaControl.JSON_MIME_TYPE], produces = [HypermediaControl.JSON_MIME_TYPE] )
     ResponseEntity<HypermediaControl> calculateHIDs( @RequestBody @Valid final HypermediaControl request,
                                                      @RequestHeader( 'X-Correlation-Id' ) Optional<String> correlationID,
                                                      UriComponentsBuilder componentsBuilder ) {
@@ -108,16 +106,9 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
 
     private static HypermediaControl calculateIDs( HypermediaControl request ) {
         request.items.each { data ->
-            def hidBuilder = new HidBuilder()
-            hidBuilder.knownLegacyCode( data.knownLanguage )
-            hidBuilder.learningLegacyCode( data.learningLanguage )
-            data.hid = hidBuilder.newHid( createPhrase( data.side1 ), createPhrase( data.side2 ) )
+            data.hid = 'FIX ME!'
         }
         request.httpCode = HttpStatus.OK.value()
         request
-    }
-
-    private static Phrase createPhrase( String phrase ) {
-        new Phrase( phrase, null, null )
     }
 }
