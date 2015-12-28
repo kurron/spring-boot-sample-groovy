@@ -1,4 +1,4 @@
-= HID Generator API Guide
+= Sample API Guide
 Ron Kurr;
 :doctype: book
 :toc:
@@ -9,7 +9,7 @@ Ron Kurr;
 
 [[overview]]
 = Overview
-The Hash ID (HID) Generator service is a simple microservice that calculates a message digest (cryptographic hash) of a particular card.  The algorithm
+This sample service is a simple microservice that calculates a message digest (cryptographic hash) of a particular card.  The algorithm
 is compatible with existing systems so the same card should hash out to the same value between systems.
 
 This document adheres to the wording defined in https://www.ietf.org/rfc/rfc2119.txt[rfc2119] to be a clear as
@@ -18,7 +18,7 @@ possible in the expectations and outcomes of the API.
 [[overview-http-verbs]]
 == HTTP verbs
 
-HID Generator tries to adhere as closely as possible to standard HTTP and REST conventions in its
+This sample service tries to adhere as closely as possible to standard HTTP and REST conventions in its
 use of HTTP verbs.  The supported verbs are idempotent so that retrying an operation in a partial
 failure scenario is expected and will not adversely affect the service.
 
@@ -50,7 +50,7 @@ failure scenario is expected and will not adversely affect the service.
 [[overview-http-status-codes]]
 == HTTP status codes
 
-HID Generator tries to adhere as closely as possible to standard HTTP and REST conventions in its
+This sample service tries to adhere as closely as possible to standard HTTP and REST conventions in its
 use of HTTP status codes.
 
 |===
@@ -78,7 +78,7 @@ Currently, there are no required headers but the client SHOULD provide the follo
 | Header | Usage
 
 | `X-Correlation-Id`
-| HID Generator is part of a network of cooperating services and publishes its log messages to a centralized server.  To facilitate the tracing of events
+| This sample service is part of a network of cooperating services and publishes its log messages to a centralized server.  To facilitate the tracing of events
 and messages between systems, it is RECOMMENDED that a correlation id be provided with each request. If the client is the initiator of an action, then a
 new id should be generated.  If the client, however, is reacting to an outside event or message, the client should propagate the correlation id it was handed.
 |===
@@ -117,7 +117,7 @@ include::{snippets}/validation/http-response.adoc[]
 [[overview-hypermedia]]
 == Hypermedia
 
-HID Generator uses a simple hypermedia control based on http://stateless.co/hal_specification.html[HAL] and includes links to other resources that the client
+This sample service uses a simple hypermedia control based on http://stateless.co/hal_specification.html[HAL] and includes links to other resources that the client
 can use to navigate around the service. Links can be found using the `_links` key.
 
 IMPORTANT:  Users of the API SHOULD NOT assemble or hard-code URIs themselves. Instead, they SHOULD use
@@ -127,8 +127,8 @@ result in errors as services and URIs change.
 [[overview-miscellaneous]]
 == Miscellaneous
 
-HID Generator does not currently require any form of authentication, expecting that the service will not be
-exposed directly to the public internet.  HID Generator does not currently rate limit requests, expecting that
+This sample service does not currently require any form of authentication, expecting that the service will not be
+exposed directly to the public internet.  This sample service does not currently rate limit requests, expecting that
 API users will be prudent in their use of the service.
 
 [[resources]]
@@ -160,7 +160,7 @@ include::{snippets}/api-discovery/http-response.adoc[]
 
 [[mime-type]]
 === Specifying Media Types
-The `Accept` and `Content-Type` headers contain the media types of entities being sent to and returned from the service.  HID Generator makes
+The `Accept` and `Content-Type` headers contain the media types of entities being sent to and returned from the service.  This sample service makes
 use of https://tools.ietf.org/html/rfc2045[RFC 2045] parameters to handle versioning of the formats.  An example of a media type containing version information
 might be `application/json;type=hash-id;version=1.2.3`. The version information MUST be included in the `Accept` and `Content-Type` headers.
 
@@ -173,7 +173,7 @@ of a partial failure.
 |===
 | Notable Header | Usage
 | `Accept`
-| This header is used to indicate the format of the response.  In the context of HID Generator, it is always the MIME type of the hypermedia control.
+| This header is used to indicate the format of the response.  In the context of this sample service, it is always the MIME type of the hypermedia control.
 | `Content-Type`
 | This header is used to indicate the exact format of the request being uploaded, including version.
 |===
