@@ -52,7 +52,7 @@ You can find the current API documentation at `/docs/index.hml`.
 TODO
 
 #License and Credits
-This project is licensed under a closed license and is coyprighted by Transparent Language (c).
+This project is licensed under the [Apache License Version 2.0, January 2004](http://www.apache.org/licenses/).
 
 #List of Changes
 

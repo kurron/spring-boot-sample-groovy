@@ -1,10 +1,3 @@
 <component name="CopyrightManager">
-  <settings default="">
-    <module2copyright>
-      <element module="All" copyright="TL Copyright" />
-    </module2copyright>
-    <LanguageOptions name="__TEMPLATE__">
-      <option name="addBlankAfter" value="false" />
-    </LanguageOptions>
-  </settings>
+  <settings default="Apache 2" />
 </component>

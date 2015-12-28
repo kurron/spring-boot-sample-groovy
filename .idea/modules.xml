@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/hid-generator.iml" filepath="$PROJECT_DIR$/hid-generator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-boot-sample-groovy.iml" filepath="$PROJECT_DIR$/spring-boot-sample-groovy.iml" />
     </modules>
   </component>
 </project>
