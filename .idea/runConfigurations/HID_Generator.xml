@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="HID Generator" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.transparent.hid.Application" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.kurron.sample.Application" />
     <option name="ALTERNATIVE_JRE_PATH" />
-    <module name="hid-generator" />
+    <module name="spring-boot-sample-groovy" />
     <envs />
     <method>
       <option name="Gradle.BeforeRunTask" enabled="true" tasks="processResources" externalProjectPath="$PROJECT_DIR$/build.gradle" vmOptions="" scriptParameters="" />

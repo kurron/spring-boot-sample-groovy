@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Acceptance Tests" type="JUnit" factoryName="JUnit">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <module name="hid-generator" />
+    <module name="spring-boot-sample-groovy" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" />
-    <option name="PACKAGE_NAME" value="com.transparent.hid.inbound" />
-    <option name="MAIN_CLASS_NAME" value="com.transparent.hid.inbound.AcceptanceTests" />
+    <option name="PACKAGE_NAME" value="org.kurron.sample.inbound" />
+    <option name="MAIN_CLASS_NAME" value="org.kurron.sample.inbound.AcceptanceTests" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <option name="VM_PARAMETERS" value="-ea -Dspring.profiles.active=IDE -Dintegration.test.port=8080" />
