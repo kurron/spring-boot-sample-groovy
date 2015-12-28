@@ -1,6 +1,14 @@
 #Overview
-This project creates a microservice that generates card hash ids.  It is based on a library 
-maintained by the TLO team. 
+This project creates a microservice that generates flash card hash ids and is intended as a simple demonstration of combining
+ several technologies together:
+
+* Docker
+* Spring MVC
+* Spring Boot
+* Cucumber
+* Groovy
+* Spock
+* Ansible
 
 #Prerequisites
 
