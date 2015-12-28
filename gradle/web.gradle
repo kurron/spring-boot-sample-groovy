@@ -9,7 +9,8 @@ dependencies {
 //  compile('org.springframework.boot:spring-boot-starter-mobile')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-websocket')
-    testCompile("org.springframework.restdocs:spring-restdocs-mockmvc:${springRestDocsVersion}")
+//  testCompile("org.springframework.restdocs:spring-restdocs-mockmvc:${springRestDocsVersion}")
+    testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 // SpringRestDocs setup
