@@ -19,6 +19,8 @@ import static org.kurron.sample.feeback.LoggingContext.GENERIC_ERROR
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import static org.springframework.web.bind.annotation.RequestMethod.PUT
 import javax.validation.Valid
+import org.kurron.categories.ByteArrayEnhancements
+import org.kurron.categories.StringEnhancements
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
 import org.kurron.traits.GenerationAbility
@@ -106,9 +108,25 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
 
     private static HypermediaControl calculateIDs( HypermediaControl request ) {
         request.items.each { data ->
-            data.hid = 'FIX ME!'
+            def buffer = toDigestBytes( data )
+            data.hid = use( ByteArrayEnhancements ) { ->
+                buffer.toMD5()
+            }
         }
         request.httpCode = HttpStatus.OK.value()
         request
+    }
+
+    private static byte[] toDigestBytes( Data data ) {
+        def sideOneBytes = use( StringEnhancements ) { ->
+            data.side1.utf8Bytes
+        }
+        def sideTwoBytes = use( StringEnhancements ) { ->
+            data.side2.utf8Bytes
+        }
+        def bytes = new ByteArrayOutputStream( sideOneBytes.length + sideTwoBytes.length )
+        bytes.write(  sideOneBytes  )
+        bytes.write( sideTwoBytes )
+        bytes.toByteArray()
     }
 }
