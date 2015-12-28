@@ -72,7 +72,9 @@ if ( 'true' == runAcceptanceTests ) {
 
 // only publish artifacts if publishArtifacts is true, and the branch is either master or development
 if ( 'true' == publishArtifacts && branch in ['master', 'development'] ) {
-    defaultTasks << 'publish'
+// TODO: decide if we want to publish the Ansible playbook to Bintray or not
+//  defaultTasks << 'publish'
+    defaultTasks << 'publishToMavenLocal'
     defaultTasks << 'publishDockerImage'
     // ensures that deleteDockerImage will not be executed until we publish, unless a failure occurs prior to publishing
     publishDockerImage.finalizedBy deleteDockerImage
