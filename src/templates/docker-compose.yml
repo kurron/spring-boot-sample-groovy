@@ -1,7 +1,7 @@
 ${projectName}:
     build: .
     labels:
-        com.transparent.built-on: "${generated}"
-        com.transparent.branch: "${branch}"
+        org.kurron.built-on: "${generated}"
+        org.kurron.branch: "${branch}"
     container_name: "${projectName}"
     net: "host"

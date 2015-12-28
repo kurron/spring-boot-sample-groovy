@@ -9,10 +9,6 @@
               ansible_ssh_pass={{ password }}
               ansible_sudo_pass={{ password }}
 
-  - name: Installing sshpass if necessary # sshpass allows for non-interactive SSH password authentication and is required by Ansible
-#    sudo: yes # Does not work on Bamboo, passwordless sudo not set up for testdeploy user
-    apt: name=sshpass state=present
-
   - name: Creating .ssh directory if necessary
     file: dest=~/.ssh state=directory
 
@@ -23,10 +19,10 @@
   sudo: no
 
   vars:
-    container_name: hid-generator
-    host_name: hid-generator
-    registry: registry.transparent.com
-    repository: asgard-hid-generator
+    container_name: spring-boot-groovy-sample
+    host_name: spring-boot-groovy-sample
+    registry: kurron
+    repository: spring-boot-groovy-sample
     image: "{{registry}}/{{ repository }}:{{ tag }}"
     host_port: 0
     container_port: 8080

@@ -1,9 +1,9 @@
 # Pre-built JDK 8 image
 FROM kurron/docker-oracle-jdk-8:latest
 
-MAINTAINER Ron Kurr <rkurr@transparent.com>
+MAINTAINER Ron Kurr <kurr@jvmguy.com>
 
-LABEL com.transparent.built-on="${generated}" com.transparent.branch="${branch}"
+LABEL org.kurron.built-on="${generated}" org.kurron.branch="${branch}"
 
 COPY ${projectName}.jar /opt/example/${projectName}.jar
 
