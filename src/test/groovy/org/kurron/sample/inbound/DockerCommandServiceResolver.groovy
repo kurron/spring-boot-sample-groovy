@@ -31,7 +31,7 @@ class DockerCommandServiceResolver implements HttpServiceResolver {
     private static int resolvePort() {
         //TODO: I wonder if we can use the REST API instead?
 
-        def command = 'docker port hid-generator 8080/tcp'
+        def command = 'docker port spring-boot-sample-groovy 8080/tcp'
         def process = command.execute()
         def results = process.text
         log.info( 'The command {} came back with {}', command, results )

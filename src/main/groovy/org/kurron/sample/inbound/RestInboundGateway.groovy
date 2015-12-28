@@ -18,6 +18,7 @@ package org.kurron.sample.inbound
 import static org.kurron.sample.feeback.LoggingContext.GENERIC_ERROR
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import static org.springframework.web.bind.annotation.RequestMethod.PUT
+import groovy.transform.CompileDynamic
 import javax.validation.Valid
 import org.kurron.categories.ByteArrayEnhancements
 import org.kurron.categories.StringEnhancements
@@ -106,6 +107,7 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
         response.add( discoveryLink( builder ) )
     }
 
+    @CompileDynamic
     private static HypermediaControl calculateIDs( HypermediaControl request ) {
         request.items.each { data ->
             def buffer = toDigestBytes( data )
@@ -117,6 +119,7 @@ class RestInboundGateway extends AbstractFeedbackAware implements GenerationAbil
         request
     }
 
+    @CompileDynamic
     private static byte[] toDigestBytes( Data data ) {
         def sideOneBytes = use( StringEnhancements ) { ->
             data.side1.utf8Bytes

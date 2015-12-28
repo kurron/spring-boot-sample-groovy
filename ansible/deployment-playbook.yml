@@ -19,10 +19,10 @@
   sudo: no
 
   vars:
-    container_name: spring-boot-groovy-sample
-    host_name: spring-boot-groovy-sample
+    container_name: spring-boot-sample-groovy
+    host_name: spring-boot-sample-groovy
     registry: kurron
-    repository: spring-boot-groovy-sample
+    repository: spring-boot-sample-groovy
     image: "{{registry}}/{{ repository }}:{{ tag }}"
     host_port: 0
     container_port: 8080
