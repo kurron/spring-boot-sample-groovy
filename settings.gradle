@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-rootProject.name = 'hid-generator'
+rootProject.name = 'spring-boot-sample-groovy'
