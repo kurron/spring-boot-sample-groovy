@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015 Transparent Language.  All rights reserved.
+  -->
+
+<!-- This Logback configuration file is intended for production environments running inside a Docker container. -->
+<configuration debug="false">
+    <contextName>PRODUCTION</contextName>
+
+    <!-- 12 Factor says only log to STDOUT and STDERR and let the process manager worrying about sending it to logstash. -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>false</includeContext>
+            <timeZone>UTC</timeZone>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <message>message</message>
+                <logger>component</logger>
+                <version>[ignore]</version>
+                <thread>[ignore]</thread>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <!-- handles sending messages using background threads -->
+    <appender name="ASYNC-CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- The maximum capacity of the blocking queue. By default, queueSize is set to 256. -->
+        <queueSize>1024</queueSize>
+        <appender-ref ref="CONSOLE"/>
+    </appender>
+
+    <logger name="com.transparent" level="ALL"/>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC-CONSOLE"/>
+    </root>
+</configuration>
+

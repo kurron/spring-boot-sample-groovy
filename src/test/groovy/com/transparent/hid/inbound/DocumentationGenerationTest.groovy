@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+package com.transparent.hid.inbound
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.transparent.hid.Application
+import org.junit.Rule
+import org.kurron.traits.GenerationAbility
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.SpringApplicationContextLoader
+import org.springframework.boot.test.WebIntegrationTest
+import org.springframework.restdocs.RestDocumentation
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
+import spock.lang.Specification
+
+/**
+ * This test generates sample input and output that the API documentation generator uses.
+ **/
+@ContextConfiguration( loader = SpringApplicationContextLoader, classes = [Application] )
+@WebIntegrationTest( randomPort = true )
+class DocumentationGenerationTest extends Specification implements GenerationAbility {
+
+    @Rule
+    final RestDocumentation restDocumentation = new RestDocumentation( 'build/generated-snippets' )
+
+    @Autowired
+    private WebApplicationContext context
+
+    @Autowired
+    ObjectMapper mapper
+
+    static final String URI = '/hash-id'
+
+    MockMvc mockMvc
+    def documentationConfiguration = MockMvcRestDocumentation.documentationConfiguration( restDocumentation )
+
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup( context )
+                                 .apply( documentationConfiguration.uris()
+                                                                   .withHost( 'api.example.com' ) )
+                                 .build()
+    }
+
+    def 'document GET'() {
+        given: 'valid request'
+        def requestBuilder = MockMvcRequestBuilders.get( URI )
+                                                   .header( CustomHttpHeaders.X_CORRELATION_ID, randomHexString() )
+                                                   .accept( HypermediaControl.JSON_MEDIA_TYPE)
+        expect: 'the GET request to succeed'
+        mockMvc.perform( requestBuilder ).andExpect( status().isOk() ).andDo( MockMvcRestDocumentation.document( 'api-discovery' ) )
+    }
+
+    def 'document PUT'() {
+        given: 'valid request'
+        def control = buildControl()
+        def payload = mapper.writeValueAsString( control )
+        def requestBuilder = MockMvcRequestBuilders.put( URI )
+                                                   .content( payload )
+                                                   .contentType( HypermediaControl.JSON_MEDIA_TYPE )
+                                                   .header( 'Content-Length', payload.bytes.length )
+                                                   .header( CustomHttpHeaders.X_CORRELATION_ID, randomHexString() )
+                                                   .accept( HypermediaControl.JSON_MEDIA_TYPE)
+        expect: 'the PUT request to succeed'
+        mockMvc.perform( requestBuilder ).andExpect( status().isOk() ).andDo( MockMvcRestDocumentation.document( 'hid-calculation' ) )
+    }
+
+    def 'document validation scenario'() {
+        given: 'invalid request'
+        def control = buildControl()
+        control.items.first().knownLanguage = null
+        def payload = mapper.writeValueAsString( control )
+        def requestBuilder = MockMvcRequestBuilders.put( URI )
+                                                   .content( payload )
+                                                   .contentType( HypermediaControl.JSON_MEDIA_TYPE )
+                                                   .header( 'Content-Length', payload.bytes.length )
+                                                   .header( CustomHttpHeaders.X_CORRELATION_ID, randomHexString() )
+                                                   .accept( HypermediaControl.JSON_MEDIA_TYPE)
+        expect: 'the PUT request fail'
+        mockMvc.perform( requestBuilder ).andExpect( status().is4xxClientError() ).andDo( MockMvcRestDocumentation.document( 'validation' ) )
+    }
+
+    HypermediaControl buildControl() {
+        def data = (1..2).collect {
+            new Data( knownLanguage: randomHexString(), learningLanguage: randomHexString(), side1: randomHexString(), side2: randomHexString())
+        }
+        new HypermediaControl(  items: data )
+    }
+}

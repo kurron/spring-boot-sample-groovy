@@ -1,0 +1,76 @@
+# Override the default values of the info endpoint
+info:
+    app:
+        name: ${name}
+        description: ${description}
+        version: ${version}
+        realm: development
+
+endpoints:
+    sensitive: false
+
+# show the banner file during startup
+spring:
+    main:
+        banner-mode: console
+    groovy:
+        template:
+            check-template-location: false
+    jackson:
+        serialization:
+            indent_output: true
+            WRITE_EMPTY_JSON_ARRAYS: false
+
+# specify the port the service should bind to when using the embedded container, a value of 0 will bind to a randomly selected available port
+server:
+    port: 8080
+
+# be ready for HTTP proxying
+    tomcat:
+        remote_ip_header: x-forwarded-for
+        protocol_header: x-forwarded-proto
+
+security:
+    basic:
+        enabled: false
+
+# the context to use for the operation actuators, eg /operations/info
+management:
+    context-path: /operations
+    security:
+        enabled: false
+
+# operations shell
+shell:
+    auth:
+        simple:
+            user:
+                name: operations
+                password: operations
+
+# which logback configuration file to use
+logging:
+    config: classpath:logback.xml
+
+hid:
+    requireCorrelationId: false
+
+#--------- Profile specific overrides ----------#
+
+# integration testing
+---
+spring:
+    profiles: test
+
+info:
+    app:
+        realm: integration-test
+
+# live
+---
+spring:
+    profiles: production
+
+info:
+    app:
+        realm: production

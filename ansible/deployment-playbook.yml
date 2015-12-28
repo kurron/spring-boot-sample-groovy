@@ -1,0 +1,57 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - name: Adding destination host to in-memory inventory
+    add_host: hostname=destination_host
+              ansible_ssh_host={{ server }}
+              ansible_ssh_user={{ user }}
+              ansible_ssh_pass={{ password }}
+              ansible_sudo_pass={{ password }}
+
+  - name: Installing sshpass if necessary # sshpass allows for non-interactive SSH password authentication and is required by Ansible
+#    sudo: yes # Does not work on Bamboo, passwordless sudo not set up for testdeploy user
+    apt: name=sshpass state=present
+
+  - name: Creating .ssh directory if necessary
+    file: dest=~/.ssh state=directory
+
+  - name: Adding the destination host's public key to ssh known hosts
+    shell: ssh-keyscan -H {{ server }} >> ~/.ssh/known_hosts
+
+- hosts: destination_host
+  sudo: no
+
+  vars:
+    container_name: hid-generator
+    host_name: hid-generator
+    registry: registry.transparent.com
+    repository: asgard-hid-generator
+    image: "{{registry}}/{{ repository }}:{{ tag }}"
+    host_port: 0
+    container_port: 8080
+    ports: "{{ host_port }}:{{ container_port }}"
+
+  tasks:
+    - name: Checking if the container exists -- any errors are ignored
+      shell: docker inspect --format=\{\{.State.Running\}\} {{ container_name }}
+      register: container_state
+      failed_when: container_state.rc != 0 and ( "No such image or container" not in container_state.stderr )
+
+    - name: Stopping the container
+      command: docker stop {{ container_name }}
+      when: container_state.stdout == "true"
+
+    - name: Removing the container
+      command: docker rm --force=true {{ container_name }}
+      when: container_state.stdout != ""
+
+    - name: Running the container
+      command: "docker run --detach=true
+                           --restart=no
+                           --publish={{ ports }}
+                           --name={{ container_name }}
+                           --hostname={{host_name}}
+                           {{ image }}
+                           {{ additional_jvm_arguments | join( ' ' ) }}
+                           "

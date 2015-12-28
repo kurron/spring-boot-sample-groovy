@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+
+dependencies {
+//  compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.data:spring-data-rest-hal-browser')
+    compile('org.springframework.boot:spring-boot-starter-hateoas')
+//  compile('org.springframework.boot:spring-boot-starter-mobile')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-websocket')
+    testCompile("org.springframework.restdocs:spring-restdocs-mockmvc:${springRestDocsVersion}")
+}
+
+// SpringRestDocs setup
+ext.snippetsDir = file('build/generated-snippets')
+documentationTests {
+    outputs.dir snippetsDir
+}
+asciidoctor {
+    attributes 'snippets': snippetsDir
+    inputs.dir snippetsDir
+    dependsOn documentationTests
+}
+jar {
+    dependsOn asciidoctor
+    from ("${asciidoctor.outputDir}/html5") {
+        into 'static/docs'
+        include 'api-guide.html'
+        rename 'api-guide.html', 'index.html'
+    }
+}

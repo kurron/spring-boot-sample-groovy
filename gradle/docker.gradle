@@ -1,0 +1,110 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+import groovy.json.JsonBuilder
+
+def fullImageName = "${dockerRegistry}/asgard-${project.name}:${version}"
+def containerName = project.name
+
+task copyDockerfile( type: Copy, dependsOn: bootRepackage ) {
+    from 'src/templates'
+    into "$dockerDirectory"
+    expand( projectName: project.name, port: exposedPort, generated: new Date(), branch: branch )
+}
+
+task copyBuildArtifact( type: Copy, dependsOn: copyDockerfile ) {
+    def buildArtifactName = "${project.name}-${version}.jar"
+    from( 'build/libs/' ) {
+        include buildArtifactName
+        rename buildArtifactName, "${project.name}.jar"
+    }
+    into "$dockerDirectory"
+}
+
+task buildDockerImage( type: Exec, dependsOn: copyBuildArtifact ) {
+    group 'Docker'
+    description = 'Builds a docker image'
+    workingDir dockerDirectory
+    commandLine 'docker', 'build', '--tag', fullImageName, '--pull', '.'
+    doFirst {
+        logger.quiet "Building docker image $fullImageName based on the Dockerfile in $dockerDirectory/"
+    }
+}
+
+task publishDockerImage( type: Exec, dependsOn: buildDockerImage ) {
+    group 'Docker'
+    description = 'Publishes a previously built docker image to the private docker registry'
+    workingDir dockerDirectory
+    commandLine 'docker', 'push', fullImageName
+    doFirst {
+        logger.quiet "Publishing docker image $fullImageName to $dockerRegistry"
+    }
+}
+
+task deleteDockerContainer( type: Exec ) {
+    group 'Docker'
+    description = 'Deletes a docker container, even if it is running'
+    commandLine 'docker', 'rm', '-f', containerName
+    doFirst {
+        logger.quiet "Deleting docker container $containerName from the host"
+    }
+}
+
+task deleteDockerImage( type: Exec, dependsOn: [deleteDockerContainer] ) {
+    group 'Docker'
+    description = 'Deletes a docker image'
+    commandLine 'docker', 'rmi', fullImageName
+    doFirst {
+        logger.quiet "Deleting docker image $fullImageName from the host"
+    }
+}
+
+task launchContainer( type: Exec, dependsOn: buildDockerImage ) {
+    group 'Docker'
+    description = 'Runs an Ansible playbook that will launch the container for testing'
+
+    def ansibleVars = toJsonEnvironmentDescriptor( version.toString() )
+    commandLine ansiblePlaybookPath, "$projectDir/ansible/deployment-playbook.yml", '--inventory', '127.0.0.1,', '--extra-vars', ansibleVars
+    doFirst {
+        logger.quiet "Running the Ansible deployment playbook to run container $containerName based on image $fullImageName"
+    }
+    doLast {
+        // ask for the HTTP port only
+        def command = "docker port $containerName 8080/tcp"
+        logger.quiet "Executing ${command}"
+        def process = command.execute()
+        def commandResult = process.text
+        logger.quiet "Command result is ${commandResult}"
+        def port = commandResult.split( ':' ).last() as int
+        logger.quiet "The container was deployed to port $port! Adding to system properties..."
+        System.setProperty( 'integration.test.port', port.toString() )
+        waitForServerToStart( port )
+    }
+}
+
+private String toJsonEnvironmentDescriptor( String tag ) {
+    def activeProfile = System.properties['spring.profiles.active'] as String
+    def args = activeProfile ? [ "--spring.profiles.active=$activeProfile" ] : []
+    new JsonBuilder( [server: 'localhost', user: ansibleSshUser, password: ansibleSshPassword, tag: tag, additional_jvm_arguments: args] ).toString()
+}
+
+private void waitForServerToStart( int port ) {
+    def urlToPoll = "http://localhost:$port/operations/health".toURL()
+    def serverUp = false
+    def remainingAttempts = 40
+    def secondsBetweenAttempts = 2
+    while( !serverUp && remainingAttempts ) {
+        logger.quiet "Waiting ${secondsBetweenAttempts} seconds before polling the server via $urlToPoll"
+        remainingAttempts--
+        sleep secondsBetweenAttempts * 1000
+        try {
+            def result = urlToPoll.text
+            serverUp = true
+            logger.quiet "The server is up! Response: $result"
+        }
+        catch( IOException e ) {
+            logger.warn "The server is still not up. $remainingAttempts attempts remaining. Response details: ${e.message}"
+        }
+    }
+    if ( !serverUp ) { throw new IllegalStateException( 'The server took too long to start' ) }
+}

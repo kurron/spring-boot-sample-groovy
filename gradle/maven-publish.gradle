@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenPublish( MavenPublication ) {
+            artifact source: "$projectDir/ansible/deployment-playbook.yml", classifier: 'deployment-playbook', extension: 'yml'
+        }
+    }
+
+    repositories {
+        maven {
+            if ( 'master' == branch ) {
+                url=releaseURL
+            }
+            else if ( 'development' == branch ) {
+                url=milestoneURL
+            }
+            else {
+                url='Not set - only master and development branches should be published!'
+            }
+            credentials {
+                username=publishUsername 
+                password=publishPassword 
+            }
+        }
+    }
+}
+

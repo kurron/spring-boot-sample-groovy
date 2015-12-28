@@ -1,0 +1,17 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+
+apply plugin: 'spring-boot'
+
+configurations {
+    providedRuntime
+}
+
+// have Gradle expand properties when copying resource files
+processResources {
+    filesMatching( '**/application.yml' ) {
+        expand( project.properties )
+    }
+}
+

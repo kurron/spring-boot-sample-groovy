@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:${dependencyPluginVersion}"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+plugins {
+    id "org.asciidoctor.convert" version "1.5.2"
+}
+
+description = 'A Hash ID generator microservice'
+group = 'com.transparent.al'
+
+ext.coverageExcludes = []
+
+apply plugin: 'build-announcements'
+
+apply from: "$rootDir/gradle/repositories.gradle"
+apply from: "$rootDir/gradle/version.gradle"
+apply from: "$rootDir/gradle/groovy.gradle"
+apply from: "$rootDir/gradle/io-platform.gradle"
+apply from: "$rootDir/gradle/boot.gradle"
+apply from: "$rootDir/gradle/core.gradle"
+apply from: "$rootDir/gradle/web.gradle"
+apply from: "$rootDir/gradle/ops.gradle"
+apply from: "$rootDir/gradle/maven-publish.gradle"
+apply from: "$rootDir/gradle/spock.gradle"
+apply from: "$rootDir/gradle/cucumber-jvm.gradle"
+apply from: "$rootDir/gradle/dependency-exclusions.gradle"
+apply from: "$rootDir/gradle/conflicts.gradle"
+apply from: "$rootDir/gradle/docker.gradle"
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:${groovyVersion}:indy"
+    compile "org.kurron:tools-groovy:${toolsGroovyVersion}"
+    compile "com.transparent.jcommon:tl-jcommon-cardlist:${cardListVersion}"
+    runtime "net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}"
+}
+
+defaultTasks << 'clean'
+defaultTasks << 'build'
+
+if ( 'true' == runIntegrationTests ) {
+    defaultTasks += ['inboundIntegrationTests','documentationTests']
+}
+
+if ( 'true' == runAcceptanceTests ) {
+    // if acceptance tests are run make sure we cleanup -- if not, it's OK to leave things running (a.k.a. if the 'Update Docker Container' task was run from IntelliJ)
+    [launchContainer, acceptanceTests]*.finalizedBy deleteDockerImage
+    [acceptanceTests]*.dependsOn launchContainer
+    defaultTasks += ['acceptanceTests']
+}
+
+// only publish artifacts if publishArtifacts is true, and the branch is either master or development
+if ( 'true' == publishArtifacts && branch in ['master', 'development'] ) {
+    defaultTasks << 'publish'
+    defaultTasks << 'publishDockerImage'
+    // ensures that deleteDockerImage will not be executed until we publish, unless a failure occurs prior to publishing
+    publishDockerImage.finalizedBy deleteDockerImage
+}
+else {
+    defaultTasks << 'publishToMavenLocal'
+}
+

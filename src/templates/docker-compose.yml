@@ -1,0 +1,7 @@
+${projectName}:
+    build: .
+    labels:
+        com.transparent.built-on: "${generated}"
+        com.transparent.branch: "${branch}"
+    container_name: "${projectName}"
+    net: "host"

@@ -1,0 +1,8 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+dependencies {
+    testCompile "info.cukes:cucumber-junit:${cucumberVersion}"
+    testCompile "info.cukes:cucumber-groovy:${cucumberVersion}"
+    testCompile "info.cukes:cucumber-spring:${cucumberVersion}"
+}

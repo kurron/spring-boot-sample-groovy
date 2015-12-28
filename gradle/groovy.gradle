@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2015 Transparent Language.  All rights reserved.
+ */
+apply plugin: 'groovy'
+
+compileGroovy {
+    groovyOptions.configurationScript = file( "$rootDir/gradle/groovyCompilerConfiguration.groovy" )
+}
+
+compileGroovy.groovyOptions.optimizationOptions['indy'] = true
+compileTestGroovy.groovyOptions.optimizationOptions['indy'] = true
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+compileGroovy.options*.compilerArgs = ['-Xlint:deprecation','-encoding', 'UTF-8']
+compileTestGroovy.options*.compilerArgs = ['-Xlint:deprecation','-encoding', 'UTF-8']
+
+ext.sharedManifest = manifest {
+    attributes( 'Implementation-Title': project.name, 'Implementation-Version': project.version )
+}
+
+jar {
+    manifest = project.manifest {
+        from sharedManifest
+    }
+
+    from( buildDir ) {
+        include 'build-info.properties'
+    }
+}
+
+jar.dependsOn 'createBuildInformationFile'
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+task testSourcesJar(type: Jar, dependsOn: testClasses) {
+    classifier = 'test-sources'
+    from sourceSets.test.allSource
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+task testBinariesJar(type: Jar, dependsOn: testClasses) {
+    classifier = 'test'
+    from sourceSets.test.output
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'groovydoc'
+    from project.docsDir.path + '/groovydoc'
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+artifacts {
+    archives sourcesJar
+    archives testSourcesJar
+    archives testBinariesJar
+    archives groovydocJar
+}
+
+groovydoc {
+    docTitle = "docTitle: $project.name $version"
+    footer = "footer: $project.name $version"
+    header = "header: $project.name $version"
+    windowTitle = "windowTitle: $project.name $version"
+    includePrivate = false
+    overview = 'overview.html'
+    use = true
+}
+
+test {
+    useJUnit {
+        includeCategories 'org.kurron.categories.UnitTest'
+    }
+    testLogging {
+        showStandardStreams = false
+        exceptionFormat = 'full'
+    }
+    reports.html.destination =  "$buildDir/reports/unitTests"
+}
+
+task inboundIntegrationTests( type: Test, dependsOn: build ) {
+    group 'Verification'
+    description = 'Runs the inbound integration tests.'
+    useJUnit {
+        includeCategories 'org.kurron.categories.InboundIntegrationTest'
+    }
+    testLogging {
+        showStandardStreams = false
+        exceptionFormat = 'full'
+    }
+    reports.html.destination =  "$buildDir/reports/inboundIntegrationTests"
+    // if the profile system property is set, copy into forked child process
+    def springProfilesActive = System.properties['spring.profiles.active'] += ',use-stubs'
+    if ( springProfilesActive ) { systemProperties['spring.profiles.active'] = springProfilesActive }
+}
+
+task acceptanceTests( type: Test ) {
+    group 'Verification'
+    description = 'Runs the acceptance tests.'
+    // categories and cucumber tests don't play nicely -- no tests are detected and run
+    includes << '**/AcceptanceTests.class'
+    // cucumber dictates where to place the report -- note that this will still generate an empty report at build/reports/tests
+    testLogging {
+        showStandardStreams = false
+        exceptionFormat = 'full'
+    }
+    // if the profile system property is set, copy into forked child process
+    def springProfilesActive = System.properties['spring.profiles.active']
+    if ( springProfilesActive ) { systemProperties['spring.profiles.active'] = springProfilesActive }
+}
+
+task documentationTests( type: Test ) {
+    group 'Documentation'
+    description = 'Runs the tests that generate the examples for the API documentation.'
+    includes << '**/DocumentationGenerationTest.class'
+    reports.html.destination =  "$buildDir/reports/documentationTests"
+    // if the profile system property is set, copy into forked child process
+    def springProfilesActive = System.properties['spring.profiles.active']
+    if ( springProfilesActive ) { systemProperties['spring.profiles.active'] = springProfilesActive }
+}

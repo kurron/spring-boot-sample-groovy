@@ -1,0 +1,190 @@
+= HID Generator API Guide
+Ron Kurr;
+:doctype: book
+:toc:
+:sectanchors:
+:sectlinks:
+:toclevels: 4
+:source-highlighter: highlightjs
+
+[[overview]]
+= Overview
+The Hash ID (HID) Generator service is a simple microservice that calculates a message digest (cryptographic hash) of a particular card.  The algorithm
+is compatible with existing systems so the same card should hash out to the same value between systems.
+
+This document adheres to the wording defined in https://www.ietf.org/rfc/rfc2119.txt[rfc2119] to be a clear as
+possible in the expectations and outcomes of the API.
+
+[[overview-http-verbs]]
+== HTTP verbs
+
+HID Generator tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP verbs.  The supported verbs are idempotent so that retrying an operation in a partial
+failure scenario is expected and will not adversely affect the service.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to obtain resource navigation links.
+
+| `POST`
+| **Deprecated.** Use `PUT` instead.
+
+| `PUT`
+| Used to calculate a new hash ID
+
+| `PATCH`
+| Not currently supported
+
+| `DELETE`
+| Not currently supported
+
+| `HEAD`
+| Not currently supported
+
+| `OPTIONS`
+| Not currently supported
+|===
+
+[[overview-http-status-codes]]
+== HTTP status codes
+
+HID Generator tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully.
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information.
+
+| `404 Not Found`
+| The requested resource did not exist. The response body will include an error providing further information.
+
+| `412 Precondition Failed`
+| The request is missing a required header. The response body will include an error providing further information.
+|===
+
+[[overview-required-http-headers]]
+== Required HTTP headers
+
+Currently, there are no required headers but the client SHOULD provide the following headers to make the entire system as robust as possible.
+
+|===
+| Header | Usage
+
+| `X-Correlation-Id`
+| HID Generator is part of a network of cooperating services and publishes its log messages to a centralized server.  To facilitate the tracing of events
+and messages between systems, it is RECOMMENDED that a correlation id be provided with each request. If the client is the initiator of an action, then a
+new id should be generated.  If the client, however, is reacting to an outside event or message, the client should propagate the correlation id it was handed.
+|===
+
+TIP:  To accommodate asynchronous programming models, all responses will contain the `X-Correlation-Id` sent in the request.  This can be used to continue the
+logging stream or to stitch the response to the initial request.
+
+[[overview-errors]]
+== Errors
+
+Whenever an error response (status code >= 400) is returned, a hypermedia control containing information that describes the problem MUST be returned.
+The control will populate the following fields in a failure scenario:
+
+|===
+| Field | Description
+
+| `http-code`
+| The HTTP status code being returned, e.g. 413.  Useful for clients that have difficulty accessing HTTP headers.
+
+| `code`
+| An integer code uniquely identifying the error message being returned. Helpful when troubleshooting failures.
+
+| `message`
+| A short message describing the problem using terms suitable for end users.
+
+| `developer-message`
+| A more detailed message describing the problem using terms suitable for developers and may contain possible solutions.
+|===
+
+For example, a request that failed data validation will produce a `400 Bad Request` response:
+
+include::{snippets}/validation/curl-request.adoc[]
+include::{snippets}/validation/http-request.adoc[]
+include::{snippets}/validation/http-response.adoc[]
+
+[[overview-hypermedia]]
+== Hypermedia
+
+HID Generator uses a simple hypermedia control based on http://stateless.co/hal_specification.html[HAL] and includes links to other resources that the client
+can use to navigate around the service. Links can be found using the `_links` key.
+
+IMPORTANT:  Users of the API SHOULD NOT assemble or hard-code URIs themselves. Instead, they SHOULD use
+the above-described links to navigate from resource to resource.  Failure to observe this rule will undoubtedly
+result in errors as services and URIs change.
+
+[[overview-miscellaneous]]
+== Miscellaneous
+
+HID Generator does not currently require any form of authentication, expecting that the service will not be
+exposed directly to the public internet.  HID Generator does not currently rate limit requests, expecting that
+API users will be prudent in their use of the service.
+
+[[resources]]
+= Resources
+
+[[resources-index]]
+== Card
+
+A Card, in this context, is a combination of text in two different languages.  The first side of the card
+is from the perspective of the learner and is in the learner's native language.  The second side of the card is the text
+the learner is learning -- the foreign language. **NOTE:** the current API uses the term `item` instead of `card` but they
+are equivalent in this context.
+
+[[api-discovery]]
+=== API discovery
+
+A `GET` request MUST return a collection of links to the currently supported resources.
+Interpreting those resources will allow the API user to navigate the API without having
+to hard code well-known URIs.
+
+IMPORTANT: The API and its URIs are likely to change over time so the caller SHOULD
+always begin a session with API discovery to obtain the currently supported URIs.
+
+==== Example Conversation
+
+include::{snippets}/api-discovery/curl-request.adoc[]
+include::{snippets}/api-discovery/http-request.adoc[]
+include::{snippets}/api-discovery/http-response.adoc[]
+
+[[mime-type]]
+=== Specifying Media Types
+The `Accept` and `Content-Type` headers contain the media types of entities being sent to and returned from the service.  HID Generator makes
+use of https://tools.ietf.org/html/rfc2045[RFC 2045] parameters to handle versioning of the formats.  An example of a media type containing version information
+might be `application/json;type=hash-id;version=1.2.3`. The version information MUST be included in the `Accept` and `Content-Type` headers.
+
+[[hid-calculation]]
+=== Calculating Card Hash IDs
+
+A `PUT` request is used to upload a request body and initiate the calculation.  The process is idempotent and may be retried in the event
+of a partial failure.
+
+|===
+| Notable Header | Usage
+| `Accept`
+| This header is used to indicate the format of the response.  In the context of HID Generator, it is always the MIME type of the hypermedia control.
+| `Content-Type`
+| This header is used to indicate the exact format of the request being uploaded, including version.
+|===
+
+==== Example Conversation
+
+include::{snippets}/hid-calculation/curl-request.adoc[]
+include::{snippets}/hid-calculation/http-request.adoc[]
+include::{snippets}/hid-calculation/http-response.adoc[]
+
+[[current-limitations]]
+=== Current Limitations
+
+None.
