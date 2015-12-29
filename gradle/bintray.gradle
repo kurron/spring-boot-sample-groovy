@@ -15,14 +15,14 @@
  */
 
 bintray {
-    user = 'kurron'
+    user = bintrayUser
     key = System.getenv( 'BINTRAY_KEY' )
     publications = ['mavenPublish']
     pkg {
         repo = 'maven'
         name = 'docker-release'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/kurron/'
+        vcsUrl = bintrayVcsUrl
         labels = ['Docker', 'Ansible']
         publicDownloadNumbers = true
         attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee']
