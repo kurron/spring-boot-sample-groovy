@@ -28,8 +28,12 @@ plugins {
     id "org.asciidoctor.convert" version "1.5.2"
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.2"
+}
+
 description = 'A Hash ID generator microservice'
-group = 'com.transparent.al'
+group = 'org.kurron.sample'
 
 ext.coverageExcludes = []
 
@@ -72,9 +76,7 @@ if ( 'true' == runAcceptanceTests ) {
 
 // only publish artifacts if publishArtifacts is true, and the branch is either master or development
 if ( 'true' == publishArtifacts && branch in ['master', 'development'] ) {
-// TODO: decide if we want to publish the Ansible playbook to Bintray or not
-//  defaultTasks << 'publish'
-    defaultTasks << 'publishToMavenLocal'
+    defaultTasks << 'publish'
     defaultTasks << 'publishDockerImage'
     // ensures that deleteDockerImage will not be executed until we publish, unless a failure occurs prior to publishing
     publishDockerImage.finalizedBy deleteDockerImage
