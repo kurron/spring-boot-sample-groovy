@@ -17,26 +17,7 @@
 repositories {
     jcenter()
     maven {
-        url = releaseURL
-    }
-    maven {
         name = 'kurron'
         url = 'http://dl.bintray.com/kurron/maven'
-    }
-    maven {
-        name = 'Spring Milestone'
-        url = 'https://repo.spring.io/milestone'
-    }
-    maven {
-        name = 'Spring snapshots'
-        url = 'https://repo.spring.io/snapshot'
-    }
-    maven {
-        name = 'TLO released libraries'
-        url = 'http://192.168.254.81:81/artifactory/libs-release-local'
-    }
-    maven {
-        name = 'TLO snapshot libraries -- ugh!'
-        url = 'http://192.168.254.81:81/artifactory/libs-snapshot-local'
     }
 }

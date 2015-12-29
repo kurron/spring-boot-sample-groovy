@@ -22,13 +22,13 @@ bintray {
         repo = 'maven'
         name = 'docker-release'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/kurron/tools-groovy.git'
-        labels = ['gear', 'gore', 'gorilla']
+        vcsUrl = 'https://github.com/kurron/'
+        labels = ['Docker', 'Ansible']
         publicDownloadNumbers = true
         attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee']
         version {
             name = project.version
-            desc = 'Groovy-based utilities and enhancements'
+            desc = 'Ansible playbooks used to deploy Docker containers'
             released  = new Date()
             vcsTag = 'master'
             attributes = ['key': 'value']
